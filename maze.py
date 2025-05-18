@@ -1,4 +1,5 @@
 from display import Window, Point, Line
+import time
 class Cell():
     def __init__(self, window: Window):
         self.has_left_wall = True
@@ -9,6 +10,7 @@ class Cell():
         self.__bot_right = -1
         self.__top_left = -1
         self.__top_right = -1
+        self.__center = -1
         self.__win = window
 
     def draw(self, bot_left: Point, bot_right: Point, top_left: Point, top_right: Point):
@@ -16,7 +18,7 @@ class Cell():
         self.__bot_right = bot_right
         self.__top_left = top_left
         self.__top_right = top_right
-        self.center = Point((self.__top_left.x_coordinate + self.__top_right.x_coordinate)/2,(self.__top_left.y_coordinate + self.__bot_left.y_coordinate)/2)
+        self.__center = Point((self.__top_left.x_coordinate + self.__top_right.x_coordinate)/2,(self.__top_left.y_coordinate + self.__bot_left.y_coordinate)/2)
         if self.has_left_wall:
             self.__win.draw_line(Line(self.__bot_left, self.__top_left))
         if self.has_right_wall:
@@ -27,9 +29,40 @@ class Cell():
             self.__win.draw_line(Line(self.__top_left, self.__top_right))
 
     def draw_move(self, to_cell, undo=False):
-        path = Line(self.center, to_cell.center)
+        path = Line(self.__center, to_cell.__center)
         if undo == False:
             self.__win.draw_line(path, "red")
         else:
             self.__win.draw_line(path, "gray")
         
+#TODO1: Type cast the rest of the variables for maze init
+#TODO2: Make sure the create_cells method is working correctly
+#TODO3: Draw_cell method needs to be implemented
+#TODO4: Maze class needs to be tested
+
+class Maze():
+    def __init__(self, x1, y1, num_rows: int, num_cols: int, cell_size_x, cell_size_y, win):
+        self.__cells = []
+        self.__x1 = x1
+        self.__y1 = y1
+        self.__num_rows = num_rows
+        self.__num_cols = num_cols
+        self.__cell_size_x = cell_size_x
+        self.__cell_size_y = cell_size_y
+        self.__win = win
+        self.__create_cells()
+
+    def __create_cells(self):
+        rows = []
+        for i in range(self.__num_cols):
+            for j in range(self.__num_rows):
+                rows.append(Cell(self.__win))
+                self.__draw_cell(i, j)
+            self.__cells.append(rows)
+
+    def __draw_cell(self, i: int, j: int):
+        pass
+
+    def animate(self):
+        self.__win.redraw()
+        time.sleep(0.05)
