@@ -35,34 +35,47 @@ class Cell():
         else:
             self.__win.draw_line(path, "gray")
         
-#TODO1: Type cast the rest of the variables for maze init
 #TODO2: Make sure the create_cells method is working correctly
 #TODO3: Draw_cell method needs to be implemented
 #TODO4: Maze class needs to be tested
 
 class Maze():
-    def __init__(self, x1, y1, num_rows: int, num_cols: int, cell_size_x, cell_size_y, win):
+    def __init__(self, x1: float, y1: float, num_rows: int, num_cols: int, cell_size_x: float, cell_size_y: float, window: Window, draw_speed: float = 0.05):
         self.__cells = []
-        self.__x1 = x1
+        self.__x1 = x1 #x, y maze start position
         self.__y1 = y1
         self.__num_rows = num_rows
         self.__num_cols = num_cols
         self.__cell_size_x = cell_size_x
         self.__cell_size_y = cell_size_y
-        self.__win = win
+        self.__win = window
+        self.__draw_speed = draw_speed
         self.__create_cells()
 
     def __create_cells(self):
         rows = []
         for i in range(self.__num_cols):
+            row = []
             for j in range(self.__num_rows):
-                rows.append(Cell(self.__win))
+                row.append(Cell(self.__win))
+            rows.append(row)
+        self.__cells = rows
+        for i in range(self.__num_cols):
+            for j in range(self.__num_rows):
                 self.__draw_cell(i, j)
-            self.__cells.append(rows)
 
     def __draw_cell(self, i: int, j: int):
-        pass
+        if not self.__win:
+            return
+        x1 = self.__x1 + (i * self.__cell_size_x)
+        x2 = x1 + self.__cell_size_x
+        y1 = self.__y1 + (j * self.__cell_size_y)
+        y2 = y1 + self.__cell_size_y
+        self.__cells[i][j].draw(Point(x1, y2), Point(x2, y2), Point(x1, y1), Point(x2, y1))
+        self.__animate()
 
-    def animate(self):
+    def __animate(self):
+        if not self.__win:
+            return
         self.__win.redraw()
-        time.sleep(0.05)
+        time.sleep(self.__draw_speed)
