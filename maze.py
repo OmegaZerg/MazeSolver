@@ -1,7 +1,7 @@
 from display import Window, Point, Line
 import time
 class Cell():
-    def __init__(self, window: Window):
+    def __init__(self, window: Window = None):
         self.has_left_wall = True
         self.has_right_wall = True
         self.has_top_wall = True
@@ -14,6 +14,8 @@ class Cell():
         self.__win = window
 
     def draw(self, bot_left: Point, bot_right: Point, top_left: Point, top_right: Point):
+        if not self.__win:
+            return
         self.__bot_left = bot_left
         self.__bot_right = bot_right
         self.__top_left = top_left
@@ -29,18 +31,17 @@ class Cell():
             self.__win.draw_line(Line(self.__top_left, self.__top_right))
 
     def draw_move(self, to_cell, undo=False):
+        if not self.__win:
+            return
         path = Line(self.__center, to_cell.__center)
         if undo == False:
             self.__win.draw_line(path, "red")
         else:
             self.__win.draw_line(path, "gray")
         
-#TODO2: Make sure the create_cells method is working correctly
-#TODO3: Draw_cell method needs to be implemented
-#TODO4: Maze class needs to be tested
 
 class Maze():
-    def __init__(self, x1: float, y1: float, num_rows: int, num_cols: int, cell_size_x: float, cell_size_y: float, window: Window, draw_speed: float = 0.05):
+    def __init__(self, x1: float, y1: float, num_rows: int, num_cols: int, cell_size_x: float, cell_size_y: float, window: Window = None, draw_speed: float = 0.05):
         self.__cells = []
         self.__x1 = x1 #x, y maze start position
         self.__y1 = y1
