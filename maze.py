@@ -13,6 +13,7 @@ class Cell():
         self.__top_right = -1
         self.__center = -1
         self.visited = False
+        self.exit = False
         self.__win = window
 
     def draw(self, bot_left: Point, bot_right: Point, top_left: Point, top_right: Point):
@@ -66,6 +67,7 @@ class Maze():
         self.__create_cells()
         self.__break_entrance_and_exit()
         self.__break_walls_r(0,0)
+        self.__reset_cells_visited()
 
     def __create_cells(self):
         rows = []
@@ -99,6 +101,7 @@ class Maze():
         self.__cells[0][0].has_top_wall = False
         self.__draw_cell(0,0)
         self.__cells[-1][-1].has_bottom_wall = False
+        self.__cells[-1][-1].exit = True
         self.__draw_cell(self.__num_cols - 1, self.__num_rows - 1)
 
     def __break_walls_r(self, i, j):
@@ -109,24 +112,28 @@ class Maze():
             new_i = i - 1
             new_j = j
             if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+            #if new_i >= 0:
                 if self.__cells[new_i][new_j].visited == False:
                     unvisited_neighboors.append((new_i, new_j))
             #Check down
             new_i = i + 1
             new_j = j
             if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+            #if new_i <= self.__num_rows-1:
                 if self.__cells[new_i][new_j].visited == False:
                     unvisited_neighboors.append((new_i, new_j))
             #Check Left
             new_i = i
             new_j = j - 1
             if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+            #if new_j >= 0:
                 if self.__cells[new_i][new_j].visited == False:
                     unvisited_neighboors.append((new_i, new_j))
             #Check right
             new_i = i
             new_j = j + 1
             if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+            #if new_j <= self.__num_cols-1:
                 if self.__cells[new_i][new_j].visited == False:
                     unvisited_neighboors.append((new_i, new_j))
 
@@ -155,3 +162,60 @@ class Maze():
 
             #Move to chosen cell
             self.__break_walls_r(lucky_neighboor[0], lucky_neighboor[1])
+
+    def __reset_cells_visited(self):
+        for i in range(self.__num_cols):
+            for j in range(self.__num_rows):
+                self.__cells[i][j].visited = False
+
+    def solve(self):
+        return self.__solve_r(0, 0)
+
+    def __solve_r(self, i, j):
+        self.__animate()
+        self.__cells[i][j].visited = True
+        if self.__cells[i][j].exit == True:
+            return True
+        #Check up
+        new_i = i - 1
+        new_j = j
+        if new_i >= 0:
+            if self.__cells[new_i][new_j].has_bottom_wall == False and self.__cells[i][j].has_top_wall == False and self.__cells[new_i][new_j].visited == False:
+                self.__cells[i][j].draw_move(self.__cells[new_i][new_j])
+                result = self.__solve_r(new_i, new_j)
+                if result:
+                    return True
+                else:
+                    self.__cells[i][j].draw_move(self.__cells[new_i][new_j], True)
+        #Check down
+        new_i = i + 1
+        new_j = j
+        if new_i <= self.__num_rows-1:
+            if self.__cells[new_i][new_j].has_top_wall == False and self.__cells[i][j].has_bottom_wall == False and self.__cells[new_i][new_j].visited == False:
+                result = self.__solve_r(new_i, new_j)
+                if result:
+                    return True
+                else:
+                    self.__cells[i][j].draw_move(self.__cells[new_i][new_j], True)
+        #Check Left
+        new_i = i
+        new_j = j - 1
+        if new_j >= 0:
+            if self.__cells[new_i][new_j].has_right_wall == False and self.__cells[i][j].has_left_wall == False and self.__cells[new_i][new_j].visited == False:
+                result = self.__solve_r(new_i, new_j)
+                if result:
+                    return True
+                else:
+                    self.__cells[i][j].draw_move(self.__cells[new_i][new_j], True)
+        #Check right
+        new_i = i
+        new_j = j + 1
+        if new_j <= self.__num_cols-1:
+            if self.__cells[new_i][new_j].has_left_wall == False and self.__cells[i][j].has_right_wall == False and self.__cells[new_i][new_j].visited == False:
+                result = self.__solve_r(new_i, new_j)
+                if result:
+                    return True
+                else:
+                    self.__cells[i][j].draw_move(self.__cells[new_i][new_j], True)
+
+        return False
