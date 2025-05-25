@@ -1,5 +1,6 @@
 from display import Window, Point, Line
 import time
+from random import random, choice
 class Cell():
     def __init__(self, window: Window = None):
         self.has_left_wall = True
@@ -11,6 +12,7 @@ class Cell():
         self.__top_left = -1
         self.__top_right = -1
         self.__center = -1
+        self.visited = False
         self.__win = window
 
     def draw(self, bot_left: Point, bot_right: Point, top_left: Point, top_right: Point):
@@ -49,7 +51,7 @@ class Cell():
         
 
 class Maze():
-    def __init__(self, x1: float, y1: float, num_rows: int, num_cols: int, cell_size_x: float, cell_size_y: float, window: Window = None, draw_speed: float = 0.05):
+    def __init__(self, x1: float, y1: float, num_rows: int, num_cols: int, cell_size_x: float, cell_size_y: float, window: Window = None, draw_speed: float = 0.05, seed: float = None):
         self.__cells = []
         self.__x1 = x1 #x, y maze start position
         self.__y1 = y1
@@ -59,8 +61,11 @@ class Maze():
         self.__cell_size_y = cell_size_y
         self.__win = window
         self.__draw_speed = draw_speed
+        if seed:
+            random.seed(seed)
         self.__create_cells()
         self.__break_entrance_and_exit()
+        self.__break_walls_r(0,0)
 
     def __create_cells(self):
         rows = []
@@ -95,3 +100,58 @@ class Maze():
         self.__draw_cell(0,0)
         self.__cells[-1][-1].has_bottom_wall = False
         self.__draw_cell(self.__num_cols - 1, self.__num_rows - 1)
+
+    def __break_walls_r(self, i, j):
+        self.__cells[i][j].visited = True
+        while True:
+            unvisited_neighboors = []
+            #Check up
+            new_i = i - 1
+            new_j = j
+            if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+                if self.__cells[new_i][new_j].visited == False:
+                    unvisited_neighboors.append((new_i, new_j))
+            #Check down
+            new_i = i + 1
+            new_j = j
+            if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+                if self.__cells[new_i][new_j].visited == False:
+                    unvisited_neighboors.append((new_i, new_j))
+            #Check Left
+            new_i = i
+            new_j = j - 1
+            if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+                if self.__cells[new_i][new_j].visited == False:
+                    unvisited_neighboors.append((new_i, new_j))
+            #Check right
+            new_i = i
+            new_j = j + 1
+            if 0 <= new_i < self.__num_rows and 0 <= new_j < self.__num_cols:
+                if self.__cells[new_i][new_j].visited == False:
+                    unvisited_neighboors.append((new_i, new_j))
+
+            #If neighbors is empty, then we're done and time to draw the maze
+            if len(unvisited_neighboors) < 1:
+                self.__draw_cell(i, j)
+                return
+            
+            lucky_neighboor = choice(unvisited_neighboors)
+            #Moving Up
+            if i > lucky_neighboor[0]:
+                self.__cells[i][j].has_top_wall = False
+                self.__cells[lucky_neighboor[0]][lucky_neighboor[1]].has_bot_wall = False
+            #Moving Down
+            if i < lucky_neighboor[0]:
+                self.__cells[i][j].has_bot_wall = False
+                self.__cells[lucky_neighboor[0]][lucky_neighboor[1]].has_top_wall = False
+            #Moving Left
+            if j > lucky_neighboor[1]:
+                self.__cells[i][j].has_left_wall = False
+                self.__cells[lucky_neighboor[0]][lucky_neighboor[1]].has_right_wall = False
+            #Moving Right
+            if j < lucky_neighboor[1]:
+                self.__cells[i][j].has_right_wall = False
+                self.__cells[lucky_neighboor[0]][lucky_neighboor[1]].has_left_wall = False
+
+            #Move to chosen cell
+            self.__break_walls_r(lucky_neighboor[0], lucky_neighboor[1])

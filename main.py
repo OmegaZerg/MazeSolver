@@ -1,9 +1,7 @@
 from display import Window, Point, Line
 from maze import Cell, Maze
 
-def main():
-    win = Window(800, 600)
-    
+def main():    
     # #----Testing----
     # point1, point2 = Point(100.5, 250), Point(300, 320.8)
     # line = Line(point1, point2)
@@ -19,7 +17,17 @@ def main():
     # cell1.draw_move(cell2, True)
 
     #----Testing3----
-    maze = Maze(5, 5, 20, 20, 30, 30, win, 0.01)
+    rows = 10
+    columns = 10
+    margin = 5 
+    window_x = 800
+    window_y = 600
+    cell_size_x = (window_x - 2 * margin) / columns
+    cell_size_y = (window_y - 2 * margin) / rows
+    draw_speed = 0.01
+
+    win = Window(window_x, window_y)
+    maze = Maze(margin, margin, rows, columns, cell_size_x, cell_size_y, win, draw_speed)
     
     win.redraw()
     win.wait_for_close()
